@@ -102,7 +102,7 @@ else:
                         t['status'] = "prerusen"
                         t['history'].append({
                             "action": "pause",
-                            "note": "automaticky přerušeno při spuštění jiného úkolu",
+                            "note": f"automaticky přerušeno při spuštění úkolu: {task['description']}",
                             "timestamp": now,
                             "user": user_email,
                         })
@@ -138,32 +138,32 @@ else:
                 })
             st.success(f"Akce {action_clicked} uložena.")
             st.rerun()
-        # --- Sdílení úkolu s kolegy ---
-        with st.expander("Sdílet úkol s kolegy / požádat o pomoc"):
-            # Vyber kolegy (více najednou, kromě sebe a už přiřazených)
-            potential_helpers = [email for email in st.session_state.users.keys()
-                                 if email != task["assigned_to"]
-                                 and email != user_email
-                                 and email not in task.get("shared_with",[])]
-            helper_names = [f"{st.session_state.users[email]} ({email})" for email in potential_helpers]
-            selected = st.multiselect(
-                f"Vyber kolegy, kterým úkol sdílet (pro úkol {task['id']}):",
-                options=potential_helpers,
-                format_func=lambda x: st.session_state.users.get(x, x)
-            )
-            if st.button("Sdílet s vybranými kolegy", key=f"sharebtn_{task['id']}"):
-                if "shared_with" not in task:
-                    task["shared_with"] = []
-                added = []
-                for email in selected:
-                    if email not in task["shared_with"]:
-                        task["shared_with"].append(email)
-                        added.append(st.session_state.users.get(email, email))
-                if added:
-                    st.success("Úkol nyní sdílen s: " + ", ".join(added))
-                    st.rerun()
-                else:
-                    st.info("Nebyl vybrán žádný nový kolega nebo již byl úkol sdílen.")
+
+        # --- Sdílení úkolu s kolegy (pouze vlastník úkolu = assigned_to) ---
+        if user_email == task["assigned_to"]:
+            with st.expander("Sdílet úkol s kolegy / požádat o pomoc"):
+                # Vyber kolegy (více najednou, kromě sebe a už přiřazených)
+                potential_helpers = [email for email in st.session_state.users.keys()
+                                     if email != task["assigned_to"]
+                                     and email not in task.get("shared_with",[])]
+                selected = st.multiselect(
+                    f"Vyber kolegy, kterým úkol sdílet (pro úkol {task['id']}):",
+                    options=potential_helpers,
+                    format_func=lambda x: st.session_state.users.get(x, x)
+                )
+                if st.button("Sdílet s vybranými kolegy", key=f"sharebtn_{task['id']}"):
+                    if "shared_with" not in task:
+                        task["shared_with"] = []
+                    added = []
+                    for email in selected:
+                        if email not in task["shared_with"]:
+                            task["shared_with"].append(email)
+                            added.append(st.session_state.users.get(email, email))
+                    if added:
+                        st.success("Úkol nyní sdílen s: " + ", ".join(added))
+                        st.rerun()
+                    else:
+                        st.info("Nebyl vybrán žádný nový kolega nebo již byl úkol sdílen.")
 
         # --- Historie a přehled práce ---
         with st.expander("Historie práce na úkolu"):
