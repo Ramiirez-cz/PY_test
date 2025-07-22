@@ -35,13 +35,13 @@ if "user_email" not in st.session_state:
             st.session_state.user_email = user_email.strip()
             st.session_state.name = name.strip()
             st.success("Přihlášení OK. Zobrazují se jen vaše úkoly.")
-            st.experimental_rerun()
+            st.rerun()
     st.stop()
 
 st.write(f"👋 Přihlášen jako **{st.session_state.user_email}**")
 if st.button("Odhlásit se"):
     del st.session_state.user_email
-    st.experimental_rerun()
+    st.rerun()
 
 # --- Výpis úkolů pro uživatele ---
 user_email = st.session_state.user_email
@@ -99,7 +99,7 @@ else:
                 "user": user_email,
             })
             st.success(f"Akce {action_clicked} uložena.")
-            st.experimental_rerun()
+            st.rerun()
 
         # Zobraz historii u úkolu
         with st.expander("Historie práce na úkolu"):
@@ -125,4 +125,4 @@ with st.expander("Správa úkolů (admin)"):
                 "history": [],
             })
             st.success("Úkol přidán.")
-            st.experimental_rerun()
+            st.rerun()
